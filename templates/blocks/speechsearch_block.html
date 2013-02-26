@@ -1,0 +1,147 @@
+<div class="txtcenter">
+<form id="speech_search_form" style="margin-top: 0;" action="<{xoAppUrl search.php}>" method="get">
+  <input id="search_query" type="text" name="query" size="14" />
+  <input type="hidden" name="action" value="results" />
+  <button id="start_button" onclick="startButton(null);" type="button" title="<{$block.lang_mic_alt}>" style="border: 0; background-color:transparent; padding: 0;"><img id="start_img" src="<{xoAppUrl modules/speechsearch/images/mic.gif}>" alt="<{$block.lang_mic_alt}>" style="vertical-align:text-top;"></button>
+  <br /><input type="submit" value="<{$block.lang_search}>" />
+</form>
+<{if $block.show_advanced}><a href="<{xoAppUrl search.php}>" title="<{$block.lang_advsearch}>"><{$block.lang_advsearch}></a><{/if}>
+</div>
+<script>
+
+showInfo('info_start');
+
+var create_email = false;
+var final_transcript = '';
+var recognizing = false;
+var ignore_onend;
+var start_timestamp;
+if (!('webkitSpeechRecognition' in window)) {
+  upgrade();
+} else {
+  start_button.style.display = 'inline-block';
+  var recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = function() {
+    recognizing = true;
+    showInfo('info_speak_now');
+    start_img.src = '<{xoAppUrl modules/speechsearch/images/mic-animate.gif}>';
+  };
+
+  recognition.onerror = function(event) {
+	console.log(event.error);
+    if (event.error == 'no-speech') {
+      start_img.src = '<{xoAppUrl modules/speechsearch/images/mic.gif}>';
+      showInfo('info_no_speech');
+      ignore_onend = true;
+    }
+    if (event.error == 'audio-capture') {
+      start_img.src = '<{xoAppUrl modules/speechsearch/images/mic.gif}>';
+      showInfo('info_no_microphone');
+      ignore_onend = true;
+    }
+    if (event.error == 'not-allowed') {
+      if (event.timeStamp - start_timestamp < 100) {
+        showInfo('info_blocked');
+      } else {
+        showInfo('info_denied');
+      }
+      ignore_onend = true;
+    }
+  };
+
+  recognition.onend = function() {
+    recognizing = false;
+    if (ignore_onend) {
+      return;
+    }
+    start_img.src = '<{xoAppUrl modules/speechsearch/images/mic.gif}>';
+    if (!final_transcript) {
+      showInfo('info_start');
+      return;
+    }
+    showInfo('');
+    document.getElementById('search_query').value = final_transcript;
+    document.forms['speech_search_form'].submit();
+  };
+
+  recognition.onresult = function(event) {
+    var interim_transcript = '';
+    for (var i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        final_transcript += event.results[i][0].transcript;
+      } else {
+        interim_transcript += event.results[i][0].transcript;
+      }
+    }
+  };
+}
+
+function upgrade() {
+  var sb=document.getElementById('start_button');
+  sb.style.display = 'none';
+  sb.style.visibility = 'hidden';
+  showInfo('info_upgrade');
+}
+
+var two_line = /\n\n/g;
+var one_line = /\n/g;
+function linebreak(s) {
+  return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+}
+
+var first_char = /\S/;
+function capitalize(s) {
+  return s.replace(first_char, function(m) { return m.toUpperCase(); });
+}
+
+function startButton(event) {
+  if (!event) var event = window.event;
+  if (recognizing) {
+    recognition.stop();
+    return;
+  }
+  final_transcript = '';
+  recognition.lang = '<{$block.locale}>';
+  recognition.start();
+  ignore_onend = false;
+  start_img.src = '<{xoAppUrl modules/speechsearch/images/mic-slash.gif}>';
+  showInfo('info_allow');
+  start_timestamp = event.timeStamp;
+}
+
+function showInfo(s) {
+	var sb=document.getElementById('start_button');
+	switch (s) {
+		case "info_speak_now":
+			sb.title="<{$smarty.const._MB_SPEECHSEARCH_INFO_SPEAK_NOW}>";
+			break;
+		case "info_no_speech":
+			sb.title="<{$smarty.const._MB_SPEECHSEARCH_INFO_NO_SPEECH}>";
+			break;
+		case "info_no_microphone":
+			sb.title="<{$smarty.const._MB_SPEECHSEARCH_INFO_NO_MICROPHONE}>";
+			break;
+		case "info_allow":
+			sb.title='<{$smarty.const._MB_SPEECHSEARCH_INFO_ALLOW}>';
+			break;
+		case "info_denied":
+			sb.title="<{$smarty.const._MB_SPEECHSEARCH_INFO_DENIED}>";
+			break;
+		case "info_blocked":
+			sb.title="<{$smarty.const._MB_SPEECHSEARCH_INFO_BLOCKED}>";
+			break;
+		case "info_upgrade":
+			sb.title="<{$smarty.const._MB_SPEECHSEARCH_INFO_UPGRADE}>";
+			break;
+		case "info_start":
+		default:
+			sb.title="<{$smarty.const._MB_SPEECHSEARCH_INFO_START}>";
+			break;
+	}
+}
+
+</script>
+

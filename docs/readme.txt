@@ -1,0 +1,45 @@
+Speech Search - a module for XOOPS and ImpressCMS
+
+Overview
+========
+This module adds a search block which supports entry by the proposed 
+Web Speech API standard for HTML5 to a XOOPS or ImpressCMS site. 
+The block degrades gracefully to a normal search block if the Web
+Speech API is not supported by the browser. (As of the time of this
+writing, only Google Chrome version 25 or above supports this API.)
+
+Installation
+============
+The distribution archive can be expanded directly into the main
+directory of your XOOPS or ImpressCMS site. Then, install the 
+speechsearch module from the system administration area of your CMS.
+
+Usage
+=====
+Enable the Speech Search block. To activate speech search, click the
+microphone icon in the search box. Status and other feedback is 
+presented as a title (tooltip) to the icon.
+
+The user must allow the CMS site access to the microphone for speech 
+input to be accepted. Any recognized speech will be used as a search 
+query, and results will be returned using the normal search result 
+mechanisms.
+
+Presently, user authorization over https is persistent, while it must 
+be repeated on each invocation over http. This is part of Google's 
+specification and implementation, not the Speech Search module.
+
+Notes
+=====
+The javascript access to the Web Speech API was largely based on the 
+demo code available here:
+https://github.com/GoogleChrome/webplatform-samples/tree/master/webspeechdemo
+
+A discussion of this API can be found here:
+http://updates.html5rocks.com/2013/01/Voice-Driven-Web-Apps-Introduction-to-the-Web-Speech-API
+
+This module has been tested in ImpressCMS versions 1.2.7 and 1.3.4,
+and in Xoops version 2.5.5.
+
+This module was developed by Geekwright, LLC. Report any bugs
+or issues to richard@geekwright.com

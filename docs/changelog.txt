@@ -1,0 +1,7 @@
+Speech Search Module ChangeLog
+
+=== Speech Search 1.0 ===
+Release date: 26 Feb 2013
+
+* initial release
+
